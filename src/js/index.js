@@ -1,17 +1,38 @@
-import axios from "axios";
+import Search from "./models/Search";
+import * as searchView from "./views/searchView";
+import { elements } from "./views/base";
 
-async function getResults(query) {
-  //const proxy = "https://cors-anywhere.herokuapp.com/";
-  const key = "3bc9402e572e7d4fb0424c5da6749516";
-  try {
-    const res = await axios(
-      `https://www.food2fork.com/api/search?key=${key}&q=${query}`
-    );
-    const recipes = res.data.recipes;
-    console.log(recipes);
-  } catch (error) {
-    alert(error);
+/* Global State of the app 
+    -search object
+    -current recipe object
+    -shopping list object
+    -Liked recipes object
+*/
+const state = {};
+
+const controlSearch = async () => {
+  // 1. get query from the view
+  const query = searchView.getInput(); //TODO
+  console.log(query);
+
+  if (query) {
+    // 2. New search object and add it to the state
+    state.search = new Search(query);
+
+    // 3. prepare UI for results
+    searchView.clearInput();
+    searchView.clearResults();
+
+    // 4. Search for recipes
+
+    await state.search.getResults();
+
+    // 5. Render resuts on the UI
+    searchView.renderResults(state.search.result);
   }
-}
+};
 
-getResults("tomato pasta");
+elements.searchForm.addEventListener("submit", e => {
+  e.preventDefault();
+  controlSearch();
+});
